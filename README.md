@@ -6,7 +6,7 @@ This tutorial is for absolute beginners who want to create a Telegram bot using 
 There are several reasons to choose Telegraf.js, but the key one, especially for beginners like us, is its **middleware-based architecture** (think Express.js or Koa).
 
 ### Steps
-- [Creating a New Bot with BotFather]
+- [Creating a New Bot with BotFather](#1-get-your-bot-token-from-botfather)
 - [More steps coming soon as we build this tutorial together!]
 
 ### 1-Get Your Bot Token from BotFather
