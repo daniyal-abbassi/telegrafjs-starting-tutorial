@@ -1,20 +1,23 @@
-# telegraf.js Tutorial For absolute beginners
+# Telegraf.js Tutorial 
 
-This tutorial is for absolute beginners who wants to create a telegram bot using [telegraf.js](https://telegraf.js.org/).
+This tutorial is for absolute beginners who want to create a Telegram bot using [Telegraf.js](https://telegraf.js.org/). Whether you're new to coding or just new to bots, we’ll walk through the process step-by-step to get you started!
 
-### Why telegraf.js and not [node-telegram-bot-api]((https://github.com/yagop/node-telegram-bot-api)) ?
-There are multiple reasons which I don't dive in to, BUT the most important feature (specially for new learners like myself) is that the core Architecture of ```telegraf.js``` is **Middleware-based** (like Express/Koa) which is more handy and more familier to use.
+### Why Telegraf.js and Not [node-telegram-bot-api](https://github.com/yagop/node-telegram-bot-api)?
+There are several reasons to choose Telegraf.js, but the key one, especially for beginners like us, is its **middleware-based architecture** (think Express.js or Koa). This makes it easier to organize your code, handle complex tasks like multi-step conversations, and scale your bot as you learn. Unlike `node-telegram-bot-api`, which can get messy with callbacks, Telegraf.js keeps things clean and familiar, so you can focus on building your bot!
 
 ### Steps
-- [Creating new Bot with BotFather]
+- [Creating a New Bot with BotFather]
+- [More steps coming soon as we build this tutorial together!]
 
+### Get Your Bot Token from BotFather
+The first step is to create your bot using BotFather:
 
-### step-1: Get our Token from BotFather 
-The first step well... is to actually create a bot with botFather:
-- Open Telegram and Search for @BotFather account(notice blue checkmark), and start a new chat.
-- type ```/newbot``` command (or simply choose it with menu options)
-- Choose a Name and then Choose a Username (uniqe, and ends with bot) e.g. ```my_uniqe_test_bot```
-- If our chosen name is available, BotFather will give us a Token
-- Copy and Save the token (for later use save it in ```.env``` file )
+1. Open Telegram and search for the official [@BotFather](https://t.me/BotFather) account (look for the blue checkmark).
+2. Start a chat and send the `/newbot` command (or select it from the menu).
+3. Choose a name for your bot, then pick a unique username ending in `bot` (e.g., `@MyUniqueTestBot`).
+4. If the username is available, BotFather will provide a **token**.
+5. Copy the token and save it securely (e.g., in a `.env` file for later use).
 
-[token](./screenshots/botfather.png)
+![BotFather Token Example](./screenshots/botfather.png)
+
+> **Tip**: Never share your bot token publicly! It’s like a password for your bot.
