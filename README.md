@@ -17,3 +17,4 @@ The first step well... is to actually create a bot with botFather:
 - If our chosen name is available, BotFather will give us a Token
 - Copy and Save the token (for later use save it in ```.env``` file )
 
+[token](./screenshots/botfather.png)
