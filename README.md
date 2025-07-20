@@ -62,9 +62,11 @@ Now you have a bot instance that can receive **updates** from a user.
 
 > An **update** can be anything from a user: text message, stickers, media files.
 
-And that's it! now you can try and communicate with your bot
-**Send a message at start**
-When we start the bot we want it to say `Hello Telegram!` to us:
+    And that's it! now you can try and communicate with your bot
+
+    **Send a message at start**
+
+    When we start the bot we want it to say `Hello Telegram!` to us:
 
 ```js
 // Complete code
