@@ -33,14 +33,21 @@ botFather provides several adjastements for you bot, here is a short list of the
 Let's create our first message:
 >I assume we already have Set-up a node.js project
 
-install telegraf package
+first off install telegraf using ```npm```
 ```
-npm install telegraf
+npm install telegraf --save
 ```
     Then in you bot.js file (name doesn't matter) require telegraf class instance
 
 ```js
 const {Telegraf} = require('telegraf') //use curly bracets because it is an instance of telegraf class
-const {message} = require('telegraf/filters') //message instance is responsible for a single message
 ```
 
+    Now create a new bot with your token and luanch the bot
+```js
+const bot = new Telegraf('YOUR_BOT_TOKEN') //it is best-practice to save it .env file and then access it with process.env.BOT_TOKEN
+bot.lounch() 
+```
+Now you have a bot instance that can receive **updates** from a user.
+>An **update** can be anything from a user: text message, stickers, media files.     
+    
