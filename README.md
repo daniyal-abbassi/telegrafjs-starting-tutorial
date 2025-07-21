@@ -86,13 +86,13 @@ bot.start(async (ctx) => await ctx.reply("Hello Telegram!"));
 bot.help(async (ctx) => await ctx.reply("I'm a help message!"));
 ```
 
-**Reply with a specific message\***
+**Reply with a specific message**
 
 ```js
 bot.hears("hi", async (ctx) => await ctx.reply("polite...Hi There"));
 ```
 
-**Reply with a command\***
+**Reply with a command**
 
 ```js
 bot.command("CommandText", async (ctx) => await ctx.reply("Command invoked"));
