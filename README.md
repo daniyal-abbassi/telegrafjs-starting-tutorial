@@ -11,6 +11,7 @@ There are several reasons to choose Telegraf.js, but the key one, especially for
 - [Creating a New Bot with BotFather](#1-get-your-bot-token-from-botfather)
 - [First message: Hello Telegram](#2-hello-telegram)
 - [Different types of message](#3-handling-different-types-of-message)
+- [The Telegraf Context (ctx): The Heart of The Bot](#4-the-telegraf-context-ctx-the-heart-of-the-bot)
 
 ### 1-Get Your Bot Token from BotFather
 
@@ -165,4 +166,23 @@ bot.on(message("text"), async (ctx) => {
     await ctx.reply("Language!!!");
   }
 });
+```
+
+### 4-The Telegraf Context (ctx): The Heart of The Bot
+
+The **Context object** (conventionally named ```ctx```) is the central nervous system of every interaction.```ctx``` is created for each incoming update, It contains not only the update data but also a direct interface to the Telegram API and a set of convenient shortcut methods: 
+- ```ctx.update``` has access to low-level information about the entire update.
+- ```ctx.message```  access to the message object, which contains details like the text, date, and any attached media.
+- ```ctx.from```  has access to information about the user who sent the update, such as their ID, first name, and username.   
+- ```ctx.chat``` containing information about the chat where the update comming from , including its ID and type (e.g., 'private' or 'group') 
+- ```ctx.telegram``` has full access to Telegram API, You can make amy raw API call like:
+ ```await ctx.telegram.deleteMessage(ctx.chat.id,ctx.message.message_id);```
+
+It's goot to know that methods like ```ctx.reply()``` which we ware using are actually **shortcuts**! 
+For example for sending a message: 
+```js 
+// without using shortcut
+await ctx.telegram.sendMessage(ctx.message.chat.id, 'Hello');
+// with shorcut
+await ctx.reply('Hello');
 ```
