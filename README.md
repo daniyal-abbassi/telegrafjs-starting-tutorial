@@ -9,7 +9,8 @@ There are several reasons to choose Telegraf.js, but the key one, especially for
 ### Steps
 
 - [Creating a New Bot with BotFather](#1-get-your-bot-token-from-botfather)
-- [More steps coming soon as we build this tutorial together!]
+- [First message: Hello Telegram](#2-hello-telegram)
+- [Different types of message](#3-handling-different-types-of-message)
 
 ### 1-Get Your Bot Token from BotFather
 
@@ -80,6 +81,8 @@ bot.launch();
 bot.start(async (ctx) => await ctx.reply("Hello Telegram!"));
 ```
 
+> We will discuss about `ctx` later.
+
 **Send a message on `/help` command**
 
 ```js
@@ -126,4 +129,40 @@ ctx.match array is like this:
 
 ```js
 bot.command("CommandText", async (ctx) => await ctx.reply("Command invoked"));
+```
+
+### 3-Handling different types of message
+
+What if you want your bot to respond base on your specific actions or message type? Like:
+
+- Sending it a sticker, photo, video, voice ect...
+- Sending it a chat ID, a user's ID, group specifc action ect...
+- And much more...
+
+The `bot.on()` method is the most general-purpose handler. It listens for specific update types directly from the Telegram API. These types include not only text messages but also non-text events like a user sending a sticker, photo, document, or audio file.
+
+We'll use `message` filter from `telegraf/filters` to specify the subtype of message to handle.
+
+```js
+//...Previous lines
+const { message } = require("telegraf/filters"); // import the filter
+
+// Listen for any sticer sent by the user
+bot.on(message("sticker"), async (ctx) => await ctx.reply("Nice Sticker!!!"));
+
+// Listen for any medio types like photo
+bot.on(
+  message("photo"),
+  async (ctx) => await ctx.reply("Is that you in this photo !?")
+);
+
+// Listen for any text message (general text handler)
+// Use it when 'bot.command()' or 'bot.hears()' couldn't caught your text
+bot.on(message("text"), async (ctx) => {
+  const recievedText = ctx.message.text;
+  // Your logic here
+  if (recievedText.includes("shit")) {
+    await ctx.reply("Language!!!");
+  }
+});
 ```
