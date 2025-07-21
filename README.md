@@ -92,9 +92,38 @@ bot.help(async (ctx) => await ctx.reply("I'm a help message!"));
 bot.hears("hi", async (ctx) => await ctx.reply("polite...Hi There"));
 ```
 
+You can also use regex to detect a specific text in message like cat:
+
+```js
+bot.hears(
+  /cat|kitten/i,
+  async (ctx) => await ctx.reply("Did someone say cat?")
+);
+```
+
+Also you can use regex with `ctx.match` to store data and use them:
+
+```js
+bot.hears(/^\/auth (\w+) (.+)$/, async (ctx) => {
+  const username = ctx.match[1]; // extract username from matched array
+  const password = ctx.match[2];
+  await ctx.reply(`Username is: ${username} And Password is: ${password}`);
+});
+/*
+ctx.match array is like this: 
+[
+  '/auth johnDoe 12345678',
+  'jognDoe',
+  '12345678',
+  index: 0,
+  input: '/auth johnDoe 12345678',
+  groups: undefined
+]
+**/
+```
+
 **Reply with a command**
 
 ```js
 bot.command("CommandText", async (ctx) => await ctx.reply("Command invoked"));
 ```
-
