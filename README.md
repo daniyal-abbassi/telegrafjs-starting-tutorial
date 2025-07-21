@@ -71,11 +71,30 @@ When we start the bot we want it to say `Hello Telegram!` to us:
 ```js
 // Complete code
 const { Telegraf } = require("telegraf");
-require("dotenv").config; //best-practice 
+require("dotenv").config; //best-practice
 // Create a bot instance
 const bot = new Telegraf(process.env.BOT_TOKEN);
 // Lauch the bot
 bot.launch();
-// Reply with Hello Telegram  
+// Reply with Hello Telegram
 bot.start(async (ctx) => await ctx.reply("Hello Telegram!"));
 ```
+
+**Send a message on `/help` command**
+
+```js
+bot.help(async (ctx) => await ctx.reply("I'm a help message!"));
+```
+
+**Reply with a specific message\***
+
+```js
+bot.hears("hi", async (ctx) => await ctx.reply("polite...Hi There"));
+```
+
+**Reply with a command\***
+
+```js
+bot.command("CommandText", async (ctx) => await ctx.reply("Command invoked"));
+```
+
