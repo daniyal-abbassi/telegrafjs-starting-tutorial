@@ -14,6 +14,7 @@ There are several reasons to choose Telegraf.js, but the key one, especially for
 - [The Telegraf Context (ctx): The Heart of The Bot](#4-the-telegraf-context-ctx-the-heart-of-the-bot)
   **Advance topics**
 - [Keyboards](#keyboards)
+- [Send and Receive Media](#send-and-receive-media)
 - [Chains Of Middlewares](#chains-of-middlewares)
 
 ### 1-Get Your Bot Token from BotFather
@@ -308,6 +309,46 @@ bot.hears('angry',async (ctx) => {
 })
 ```
 
+### Send And Receive Media
+A key feature of Telegram bots is their ability to send and receive various types of media.It's very usefull to know:
+To process files we should use ``bot.on()`` method with appropriate message filter. good to know that files will stored on Telegram's servers, therefor they have an ID wich is very useful. as you can guess When a file is received, the context object(``ctx``) will contain information about it such as ``file_id``.
+
+You can receive media and access to its data:
+```js
+// ... previous lines
+// FILE HANDLING
+bot.on(message('document'),async(ctx) => {
+    const document = await ctx.message.document; // 'ctx' contains file's information
+    const document_id =  document.file_id; // file's ID
+    const document_name =  document.file_name; // file's name
+    const document_size =  document.file_size; // files's size
+    console.log(`File name is: ${document_name} - size: ${document_size} - id is : ${document_id}`)
+    await ctx.reply(`File name is: ${document_name} - size: ${document_size} - id is : ${document_id}`)
+})
+
+bot.lauch();
+```
+You can send Media as well, Telegraf provides a family of ``replyWith`` methods, these methods accept different types of sources for the file content:
+- By ``file_id`` (String): The most efficient method for sending a file that is already on Telegram's servers.
+
+- By URL (String): Telegram will download the file from the public URL and send it to the user.
+
+- By Local File/Buffer/Stream: Using the ``Input`` helper class, files can be sent from a local path, a ``Buffer``, or a readable stream.
+```js
+// ...previous lines
+// SEND FILE
+bot.command('media',async(ctx) => {
+    // Send photo with URL + Caption
+    await ctx.replyWithPhoto('https://picsum.photos/200/300/',{caption: 'this is cation'});
+    // Send from Local file Path
+    await ctx.replyWithDocument(Input.fromLocalFile('./path/to/file.pdf'));
+    // Send with id - assuming stickerId was stored previously
+    const stickerId = 'lkasdCASDFlkjf...';
+    await ctx.replyWithSticker(stickerId);
+})
+
+bot.lauch();
+```
 ### Chains Of Middlewars
 
 You can modify and add propertis to `ctx` object which is usefull for sessions and database.
