@@ -290,6 +290,24 @@ bot.action('no_btn',async (ctx) => {
 
 bot.launch();
 ```
+
+**Custom Reply Keyboards:** Unlike inline keyboards, which are part of a message, custom reply keyboards replace the user's standard text keyboard with a set of predefined buttons:
+```js
+//...previous lines
+bot.command('status',async (ctx) => {
+    // Use 'Markup.keyboard()' for reply keyboards
+    await ctx.reply('status? ',Markup.keyboard([
+        ['happy','sasd'],
+        ['angry','anxios'],
+        ['absurd','meloncholic']
+    ]).oneTime().resize()) // Use 'oneTime()' with 'resize()' for better stying
+})
+// instead of 'bot.action()' we should use 'bot.hears()' here
+bot.hears('angry',async (ctx) => {
+    await ctx.reply('oh..so you are angry huh??')
+})
+```
+
 ### Chains Of Middlewars
 
 You can modify and add propertis to `ctx` object which is usefull for sessions and database.
