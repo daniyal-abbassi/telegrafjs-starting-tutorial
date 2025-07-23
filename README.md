@@ -17,6 +17,7 @@ There are several reasons to choose Telegraf.js, but the key one, especially for
 - [Send and Receive Media](#send-and-receive-media)
 - [Chains Of Middlewares](#chains-of-middlewares)
 - [State, Sessions and Wizards](#state-session-and-wizards)
+- [Personal Project](#personal-project)
 
 ### 1-Get Your Bot Token from BotFather
 
@@ -561,3 +562,9 @@ bot.command("register", (ctx) => {
 
 bot.launch();
 ```
+
+### Personal Project 
+
+Now that we learn how to create our own bot, it's time to create something and learn in practice, funny thing here is that you wouldn't learn anything if don't fail! so try to fail.
+
+I wil add my project here. Soon... 
