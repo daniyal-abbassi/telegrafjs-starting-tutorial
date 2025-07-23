@@ -444,3 +444,5 @@ Untill now our bot was only dealing with one user, What if there ware more then 
 - **Leaving:** `return ctx.scene.leave()` exits the scene and clears its state.  
 
 - **State:** The `ctx.wizard.state` object is used to store data collected across steps. This state is automatically cleared when the scene is left, which is a major advantage over using the global `ctx.session` for temporary conversational data. 
+
+Now I assume You can comprehend below code:
