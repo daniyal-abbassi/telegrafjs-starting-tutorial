@@ -408,9 +408,61 @@ Untill now our bot was only dealing with one user, What if there ware more then 
 
 > Note: because I stuggled too much to grasp these concepts, I will dive deep into it.
 
-**Terminalogy**
+**Terminalogy & Code**
 
 - What are **state** and **session**? By default, interactions with a Telegram bot are **stateless**. The bot has no memory of previous messages from a user; each **update** is processed in isolation. To create meaningful conversations, the bot needs a way to store and retrieve data associated with a specific user or chat. This is achieved through **sessions**.
+
+```js
+const { Telegraf, session } = require("telegraf");
+// require'dotenv'
+require("dotenv").config;
+//create a bot instace with our token
+const bot = new Telegraf(process.env.BOT_TOKEN);
+// Use and Configure our session middleware
+bot.use(
+  session({
+    initial: () => ({ counter: 0 }),
+  })
+);
+
+bot.on("text", async (ctx) => {
+  ctx.session.counter++; //increment the number of messages for each user
+  await ctx.reply(`Message counter is: ${ctx.session.counter}`);
+});
+
+// Start the Bot
+bot.launch();
+```
+
+It's suffisiont but all session data is lost whenever tho bot's process is terminated or re-started, for more data persistance we should use `telegraf-session-local` package, It stores session data in a local JSON file, providing a simple yet effective persistence layer:
+
+```js
+const { Telegraf } = require("telegraf");
+// Import 'telegraf-session-local'
+const LocalSession = require("telegraf-session-local");
+
+const bot = new Telegraf(process.env.BOT_TOKEN);
+// Configure session so it use session_db.json file
+const localSession = new LocalSession({ database: "session_db.json" });
+// Use our session middleware
+bot.use(localSession.middleware());
+
+bot.on("text", async (ctx) => {
+  ctx.session.counter = ctx.session.counter || 0;
+  ctx.session.counter++; //keep trach of msg numbers for each user
+
+  await ctx.reply(`Message Count: ${ctx.session.counter}`);
+  return next();
+});
+
+// Remove from database
+bot.command("remove", async (ctx) => {
+  await ctx.reply("Session data removed");
+  ctx.session = null;
+});
+```
+
+> You can also use MongoDB which I didn't learned it yet, if you know and how free time, you can add it!
 
 - What are **WizardScene**s and **Stage**s? to put it simply, we are just fine with using above methods BUT when it comes to managin complex, multi-step conversations(like a user registration flow or ) that you want prevent users from accidentally triggering other bot functions while in the middle of a dialog, here is where **WizardScene** comes in handy.A **Scene** functions as a modal state machine for the user. When a user enters a **Scene**, the bot's global command and hears handlers are temporarily disabled for that user. This creates an isolated conversational environment where only the listeners defined within the **current scene** step are active. You may ask: okay, but how to do that? before that you need to grasp these Core Components:
   **Core Components and Setup**
@@ -429,20 +481,83 @@ Untill now our bot was only dealing with one user, What if there ware more then 
 
 2. **Define the steps:** Create an instance of `Scenes.WizardScene`, providing a unique ID and a series of handler functions, one for each step of the conversation.
 
-3. **Create and register the stage:** Create a ``Scenes.Stage`` instance, passing an array of all your scenes.
+3. **Create and register the stage:** Create a `Scenes.Stage` instance, passing an array of all your scenes.
 
-4. **Register middleware:** Use ``bot.use(session())`` followed by ``bot.use(stage.middleware())``.
+4. **Register middleware:** Use `bot.use(session())` followed by `bot.use(stage.middleware())`.
 
-5. **Create an entry point:** Use a command like ``bot.command('register',...)`` to trigger ``ctx.scene.enter('your-wizard-id')``.
+5. **Create an entry point:** Use a command like `bot.command('register',...)` to trigger `ctx.scene.enter('your-wizard-id')`.
 
 **Navigating & Managing the flow**
 
-- **Entering:** `ctx.scene.enter('scene-id')` starts the wizard.   
+- **Entering:** `ctx.scene.enter('scene-id')` starts the wizard.
 
-- **Advancing:** `return ctx.wizard.next()` moves to the next step handler.  
+- **Advancing:** `return ctx.wizard.next()` moves to the next step handler.
 
-- **Leaving:** `return ctx.scene.leave()` exits the scene and clears its state.  
+- **Leaving:** `return ctx.scene.leave()` exits the scene and clears its state.
 
-- **State:** The `ctx.wizard.state` object is used to store data collected across steps. This state is automatically cleared when the scene is left, which is a major advantage over using the global `ctx.session` for temporary conversational data. 
+- **State:** The `ctx.wizard.state` object is used to store data collected across steps. This state is automatically cleared when the scene is left, which is a major advantage over using the global `ctx.session` for temporary conversational data.
 
 Now I assume You can comprehend below code:
+
+```js
+// Import Scenes
+const { Telegraf, Scenes, session, Markup } = require("telegraf");
+
+// Step 1: Define the wizard scene and its steps
+const registrationWizard = new Scenes.WizardScene(
+  "registration-wizard",
+  // Step 1: Ask for name
+  (ctx) => {
+    ctx.reply("Welcome to registration! What is your name?");
+    // Initialize the state object for this wizard session
+    ctx.wizard.state.userData = {};
+    return ctx.wizard.next();
+  },
+  // Step 2: Ask for email
+  (ctx) => {
+    // Validate and store the name from the previous step
+    if (ctx.message.text.length < 2) {
+      ctx.reply("Please enter a valid name.");
+      return; // Stay on the current step
+    }
+    ctx.wizard.state.userData.name = ctx.message.text;
+
+    ctx.reply("Got it. Now, what is your email address?");
+    return ctx.wizard.next();
+  },
+  // Step 3: Confirm and leave
+  async (ctx) => {
+    // Validate and store the email
+    // A simple regex for email validation
+    if (!/^\S+@\S+\.\S+$/.test(ctx.message.text)) {
+      ctx.reply("Please enter a valid email address.");
+      return; // Stay on the current step
+    }
+    ctx.wizard.state.userData.email = ctx.message.text;
+
+    const { name, email } = ctx.wizard.state.userData;
+    await ctx.reply(
+      `Thanks, ${name}! Your registration is complete. Your email is ${email}.`
+    );
+
+    // The wizard is finished, leave the scene
+    return ctx.scene.leave();
+  }
+);
+
+const bot = new Telegraf(process.env.BOT_TOKEN);
+
+// Step 2: Create a stage and register the wizard
+const stage = new Scenes.Stage();
+
+// Step 3: Register session and stage middleware (order is important)
+bot.use(session());
+bot.use(stage.middleware());
+
+// Step 4: Create a command to enter the wizard
+bot.command("register", (ctx) => {
+  ctx.scene.enter("registration-wizard");
+});
+
+bot.launch();
+```
