@@ -17,7 +17,7 @@ There are several reasons to choose Telegraf.js, but the key one, especially for
 
 - [Keyboards](#keyboards)
 - [Send and Receive Media](#send-and-receive-media)
-- [Chains Of Middlewares](#chains-of-middlewares)
+- [Chains Of Middlewares](#chains-of-middlewars)
 - [State, Sessions and Wizards](#state-session-and-wizards)
 - [Personal Project](#personal-project)
 
