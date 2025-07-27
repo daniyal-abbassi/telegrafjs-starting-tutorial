@@ -12,7 +12,9 @@ There are several reasons to choose Telegraf.js, but the key one, especially for
 - [First message: Hello Telegram](#2-hello-telegram)
 - [Different types of message](#3-handling-different-types-of-message)
 - [The Telegraf Context (ctx): The Heart of The Bot](#4-the-telegraf-context-ctx-the-heart-of-the-bot)
-  **Advance topics**
+
+    **Advance topics**
+    
 - [Keyboards](#keyboards)
 - [Send and Receive Media](#send-and-receive-media)
 - [Chains Of Middlewares](#chains-of-middlewares)
