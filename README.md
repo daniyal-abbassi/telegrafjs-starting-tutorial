@@ -8,20 +8,20 @@ There are several reasons to choose Telegraf.js, but the key one, especially for
 
 ### Steps
 
-- [Creating a New Bot with BotFather](#1-get-your-bot-token-from-botfather)
-- [First message: Hello Telegram](#2-hello-telegram)
-- [Different types of message](#3-handling-different-types-of-message)
-- [The Telegraf Context (ctx): The Heart of The Bot](#4-the-telegraf-context-ctx-the-heart-of-the-bot)
+- [Creating a New Bot with BotFather](#1get-your-bot-token-from-botfather)
+- [First message: Hello Telegram](#2hello-telegram)
+- [Different types of message](#3handling-different-message-types)
+- [The Telegraf Context (ctx): The Heart of The Bot](#4the-telegraf-context-ctx-the-heart-of-the-bot)
 
     **Advance topics**
-    
+
 - [Keyboards](#keyboards)
 - [Send and Receive Media](#send-and-receive-media)
 - [Chains Of Middlewares](#chains-of-middlewares)
 - [State, Sessions and Wizards](#state-session-and-wizards)
 - [Personal Project](#personal-project)
 
-### 1-Get Your Bot Token from BotFather
+### 1.Get Your Bot Token from BotFather
 
 The first step is to create a bot using BotFather:
 
@@ -43,109 +43,117 @@ botFather provides several adjastements for you bot, here is a short list of the
 - `/setdescription` : change middle page text
 - `/deletebot` , `/mybots` and much more which we don't cover in this tutorial.
 
-### 2-Hello Telegram!
+### 2.Hello Telegram!
 
-Let's create our first message:
+Let's make our bot send its first message.
 
 > I assume we already have Set-up a node.js project
 
-first off install telegraf using `npm`
+First, install telegraf using `npm`
 
 ```
     npm install telegraf --save
 ```
-
-Then in you bot.js file (name doesn't matter) require telegraf class instance
+We also installed `dotenv` to handle our secret bot token.
+Then in you bot.js file (the name doesn't matter) require telegraf class instance
 
 ```js
-const { Telegraf } = require("telegraf"); //use curly bracets because it is an instance of telegraf class
+//// Destructuring: we're importing the Telegraf class from the telegraf package.
+const { Telegraf } = require("telegraf");
 ```
 
 Now create a new bot with your token and luanch the bot
 
 ```js
-const bot = new Telegraf("YOUR_BOT_TOKEN"); //it is best-practice to save it .env file and then access it with process.env.BOT_TOKEN
-bot.lounch();
+// It's best practice to save your token in a .env file
+// and access it using process.env.BOT_TOKEN
+const bot = new Telegraf("YOUR_BOT_TOKEN"); 
+bot.lounch(); // This starts your bot
 ```
 
-Now you have a bot instance that can receive **updates** from a user.
+You now have a bot that can receive updates from users.
 
 > An **update** can be anything from a user: text message, stickers, media files.
 
-And that's it! now you can try and communicate with your bot
+And that's it! now you can try and communicate with your bot `node bot.js`
 
 **Send a message at start**
 
-When we start the bot we want it to say `Hello Telegram!` to us:
+When a user first starts a chat with our bot, we want it to say `Hello Telegram!` :
 
 ```js
 // Complete code
 const { Telegraf } = require("telegraf");
-require("dotenv").config; //best-practice
+require("dotenv").config; // Loads environment variables from a .env file
+
 // Create a bot instance
 const bot = new Telegraf(process.env.BOT_TOKEN);
+
+// Reply with "Hello, Telegram!" when a user starts the bot
+bot.start(async (ctx) => await ctx.reply("Hello Telegram!"));
+
 // Lauch the bot
 bot.launch();
-// Reply with Hello Telegram
-bot.start(async (ctx) => await ctx.reply("Hello Telegram!"));
 ```
 
-> We will discuss about `ctx` later.
+> We will discuss about `ctx` later. For now, just know it's how you interact with Telegram.
 
 **Send a message on `/help` command**
 
 ```js
-bot.help(async (ctx) => await ctx.reply("I'm a help message!"));
+bot.help(async (ctx) => await ctx.reply("I'm a simple help message!"));
 ```
 
 **Reply with a specific message**
-
+The `bot.hears()` method lets you listen for specific words or phrases.
 ```js
-bot.hears("hi", async (ctx) => await ctx.reply("polite...Hi There"));
+bot.hears("hi", async (ctx) => await ctx.reply("Oh, hello to you too!"));
 ```
 
-You can also use regex to detect a specific text in message like cat:
+You can also use a regular expression (RegExp) to detect patterns. The `i` flag makes it case-insensitive.
 
 ```js
 bot.hears(
   /cat|kitten/i,
-  async (ctx) => await ctx.reply("Did someone say cat?")
+  async (ctx) => await ctx.reply("Did someone say cat? 😻")
 );
 ```
 
-Also you can use regex with `ctx.match` to store data and use them:
+You can even capture parts of the message using groups in your RegExp. The captured parts are available in `ctx.match`.
 
 ```js
 bot.hears(/^\/auth (\w+) (.+)$/, async (ctx) => {
-  const username = ctx.match[1]; // extract username from matched array
-  const password = ctx.match[2];
+  const username = ctx.match[1]; // from the first capture group: (\w+)
+  const password = ctx.match[2]; // from the second capture group: (.+)
   await ctx.reply(`Username is: ${username} And Password is: ${password}`);
 });
+
 /*
-ctx.match array is like this: 
+For the input '/auth johnDoe 12345678', the ctx.match array looks like this:
 [
-  '/auth johnDoe 12345678',
-  'jognDoe',
-  '12345678',
+  '/auth johnDoe 12345678', // The full matched string
+  'johnDoe',                // The first captured group
+  '12345678',               // The second captured group
   index: 0,
   input: '/auth johnDoe 12345678',
   groups: undefined
 ]
-**/
+*/
 ```
 
 **Reply with a command**
+The `bot.command()` method is the standard way to handle commands like `/mycommand`.
 
 ```js
 bot.command("CommandText", async (ctx) => await ctx.reply("Command invoked"));
 ```
 
-### 3-Handling different types of message
+### 3.Handling Different Message Types
 
-What if you want your bot to respond base on your specific actions or message type? Like:
+What if you want your bot to react to something other than text?
 
-- Sending it a sticker, photo, video, voice ect...
-- Sending it a chat ID, a user's ID, group specifc action ect...
+- A user sending a sticker, photo, video, or voice message.
+- A user joining or leaving a group.
 - And much more...
 
 The `bot.on()` method is the most general-purpose handler. It listens for specific update types directly from the Telegram API. These types include not only text messages but also non-text events like a user sending a sticker, photo, document, or audio file.
@@ -156,27 +164,27 @@ We'll use `message` filter from `telegraf/filters` to specify the subtype of mes
 //...Previous lines
 const { message } = require("telegraf/filters"); // import the filter
 
-// Listen for any sticer sent by the user
-bot.on(message("sticker"), async (ctx) => await ctx.reply("Nice Sticker!!!"));
+// Listen for any sticker sent by the user
+bot.on(message("sticker"), async (ctx) => await ctx.reply("Nice sticker! 👍"));
 
-// Listen for any medio types like photo
+// Listen for any media types like photo
 bot.on(
   message("photo"),
   async (ctx) => await ctx.reply("Is that you in this photo !?")
 );
 
-// Listen for any text message (general text handler)
-// Use it when 'bot.command()' or 'bot.hears()' couldn't caught your text
+// Listen for any text message (this is a general text handler)
+// It will only run if other handlers like bot.command() or bot.hears() don't catch the message first.
 bot.on(message("text"), async (ctx) => {
   const recievedText = ctx.message.text;
   // Your logic here
-  if (recievedText.includes("shit")) {
-    await ctx.reply("Language!!!");
+  if (recievedText.includes("secret")) {
+    await ctx.reply("Shhh, it's a secret!");
   }
 });
 ```
 
-### 4-The Telegraf Context (ctx): The Heart of The Bot
+### 4.The Telegraf Context (ctx): The Heart of The Bot
 
 The **Context object** (conventionally named `ctx`) is the central nervous system of every interaction.`ctx` is created for each incoming update, It contains not only the update data but also a direct interface to the Telegram API and a set of convenient shortcut methods:
 
@@ -187,17 +195,17 @@ The **Context object** (conventionally named `ctx`) is the central nervous syste
 - `ctx.telegram` has full access to Telegram API, You can make amy raw API call like:
   `await ctx.telegram.deleteMessage(ctx.chat.id,ctx.message.message_id);`
 
-It's goot to know that methods like `ctx.reply()` which we ware using are actually **shortcuts**!
-For example for sending a message:
+It's goot to know that methods like `ctx.reply()` which we've been using, are actually **shortcuts**!
 
+For example for sending a message:
 ```js
-// without using shortcut
+// without using a shortcut
 await ctx.telegram.sendMessage(ctx.message.chat.id, "Hello");
-// with shorcut
+// with the shorcut
 await ctx.reply("Hello");
 ```
 
-Here are some usefull shortcuts:
+Here are some other usefull shortcuts:
 
 - `ctx.reply(text, [extra])`: Sends a text message.
 
@@ -211,25 +219,23 @@ Here are some usefull shortcuts:
 
 - `ctx.leaveChat()`: Makes the bot leave the current chat.
 
-> **Note**: You can work with you bot by now. next sections are more advanced stuff!.
+> **Note**: You can build a pretty capable bot with just what you've learned so far. The next sections cover more advanced topics!
 
 ### Keyboards
 
-Let's move further and explore in-line keyboard which infact are very intersting!
+Let's explore inline keyboards, which are an incredibly useful feature.
 
 **What are Keyboards?** Inline keyboards are buttons that are attached directly to a message sent by the bot.
 **Why use them?** They provide a clean and intuitive way for users to interact, making them ideal for menus, confirmation dialogs, and navigation systems.
 **How they work?**. When a user presses an inline button, the bot receives a special `callback_query` update instead of a text message.
 
 **Usage:**
-First import `Markup` helper which provided by Telegraf.
-It takes an array of arrays (or object), where each inner array(or object) represents a row of buttons.
-We use this syntax `Markup.button.callback(text, callback_data)` as second argument to `ctx.reply` or other `replyWith...` methods.:
+First, we import the `Markup` helper from Telegraf. To create an inline keyboard, we use `Markup.inlineKeyboard()`, which takes an array of arrays. Each inner array represents a row of buttons. We pass this as the second argument to `ctx.reply()` or other `replyWith...` methods.
 
 ```js
 // ... Previous lines
 bot.command("menu", async (ctx) => {
-  // pass 'Markup.inlineKeyboard' as second argument
+  // Use Markup.inlineKeyboard() to create the keyboard
   await ctx.reply(
     "Main Menu:",
     Markup.inlineKeyboard([
@@ -248,12 +254,12 @@ bot.command("menu", async (ctx) => {
 });
 ```
 
-**How to handle a button press?** To handle each `callback_query` generated by a button press, the `bot.action()` method is used. worth mention that we should use `ctx.answerCbQuery()` to stop a button press loading status:
+**How to handle a button press?** We use the `bot.action()` method to handle the `callback_query` from a button press. The string inside `bot.action()` must match the `callback_data` you defined in `Markup.button.callback()`. It's good practice to call `ctx.answerCbQuery()` to let Telegram know the button press was received, which stops the loading animation on the button.
 
 ```js
 //... (bot setup and /menu command from above)
 
-// Handler for the 'song_file' callback
+// Handler for the 'song_file' action
 bot.action("song_file", (ctx) => {
   // Prevent btn from loading
   ctx.answerCbQuery("Fetching stats...");
@@ -262,7 +268,7 @@ bot.action("song_file", (ctx) => {
   ctx.reply("You select song file!");
 });
 
-// Handler for the 'persion' callback
+// Handler for the 'lang_fa' action
 bot.action("persion", (ctx) => {
   ctx.answerCbQuery(); // Stop loading
   ctx.reply("you select persion, such a beautifull chose!");
@@ -271,7 +277,7 @@ bot.action("persion", (ctx) => {
 bot.launch();
 ```
 
-**Changing Keyboard Message** : Let's say you wanna change the message's text after selecting a yes or no button:
+**Changing Keyboard Message** : You can edit the original message after a button is pressed using `ctx.editMessageText()`.
 
 ```js
 //... (bot setup)
@@ -321,9 +327,9 @@ bot.command("status", async (ctx) => {
       ["angry", "anxios"],
       ["absurd", "meloncholic"],
     ])
-      .oneTime()
-      .resize()
-  ); // Use 'oneTime()' with 'resize()' for better stying
+      .oneTime() // The keyboard disappears after one use
+      .resize() // Makes the buttons fit the screen better
+  ); 
 });
 // instead of 'bot.action()' we should use 'bot.hears()' here
 bot.hears("angry", async (ctx) => {
@@ -333,19 +339,19 @@ bot.hears("angry", async (ctx) => {
 
 ### Send And Receive Media
 
-A key feature of Telegram bots is their ability to send and receive various types of media.It's very usefull to know:
-To process files we should use `bot.on()` method with appropriate message filter. good to know that files will stored on Telegram's servers, therefor they have an ID wich is very useful. as you can guess When a file is received, the context object(`ctx`) will contain information about it such as `file_id`.
+A key feature of Telegram bots is their ability to handle media. It's very useful to know how to do this.
+To process incoming files, we use the `bot.on()` method with the appropriate message filter. Files are stored on Telegram's servers and are identified by a unique `file_id`. When a file is received, the `ctx` object contains all its information.
 
-You can receive media and access to its data:
+You can receive media and access its data like this:
 
 ```js
 // ... previous lines
 // FILE HANDLING
 bot.on(message("document"), async (ctx) => {
-  const document = await ctx.message.document; // 'ctx' contains file's information
-  const document_id = document.file_id; // file's ID
-  const document_name = document.file_name; // file's name
-  const document_size = document.file_size; // files's size
+  const document = await ctx.message.document; // 'ctx' contains file's info
+  const document_id = document.file_id; 
+  const document_name = document.file_name; 
+  const document_size = document.file_size; // files's size in bytes
   console.log(
     `File name is: ${document_name} - size: ${document_size} - id is : ${document_id}`
   );
@@ -357,11 +363,11 @@ bot.on(message("document"), async (ctx) => {
 bot.lauch();
 ```
 
-You can send Media as well, Telegraf provides a family of `replyWith` methods, these methods accept different types of sources for the file content:
+You can also send media. Telegraf provides a family of `replyWith...` methods that accept different source types:
 
 - By `file_id` (String): The most efficient method for sending a file that is already on Telegram's servers.
 
-- By URL (String): Telegram will download the file from the public URL and send it to the user.
+- By URL (String): Telegram will download the file from the public URL and send it.
 
 - By Local File/Buffer/Stream: Using the `Input` helper class, files can be sent from a local path, a `Buffer`, or a readable stream.
 
@@ -384,9 +390,9 @@ bot.lauch();
 ```
 
 ### Chains Of Middlewars
+You can "chain" middlewares together using `bot.use()`. This is powerful because each middleware can modify the `ctx` object before passing it to the next handler. This is useful for things like analytics, authorization, or pre-populating data.
 
-You can modify and add propertis to `ctx` object which is usefull for sessions and database.
-here we add a role and responed time to `ctx` object :
+Here, we'll create a simple middleware to log response times and add a `role` to the context state. :
 
 ```js
 // Middleware to add a custom property to the context
@@ -407,37 +413,39 @@ bot.launch();
 
 ### State, Session and Wizards
 
-Untill now our bot was only dealing with one user, What if there ware more then one user? how should bot **remember** which is who? There are different approaches for it which are depends on how you want your bot to remember and act:
+By default, interactions with a Telegram bot are **stateless**. The bot has no memory of previous messages from a user; each update is processed in isolation. To create meaningful, multi-step conversations, the bot needs to remember data between messages. This is achieved through sessions.
 
-> Note: because I stuggled too much to grasp these concepts, I will dive deep into it.
+> Note: Because I found these concepts challenging at first, I'll explain them in more detail.
 
 **Terminalogy & Code**
 
-- What are **state** and **session**? By default, interactions with a Telegram bot are **stateless**. The bot has no memory of previous messages from a user; each **update** is processed in isolation. To create meaningful conversations, the bot needs a way to store and retrieve data associated with a specific user or chat. This is achieved through **sessions**.
+- What are **state** and **session**? A **session** stores data for a specific user or chat. The data is attached to the `ctx` object as `ctx.session` and persists across multiple updates from that user. The data itself is often called the **state**.
 
+Let's build a simple message counter for each user.
 ```js
 const { Telegraf, session } = require("telegraf");
-// require'dotenv'
 require("dotenv").config;
-//create a bot instace with our token
 const bot = new Telegraf(process.env.BOT_TOKEN);
-// Use and Configure our session middleware
+
+// Use and configure the session middleware
+// This uses an in-memory store by default
 bot.use(
   session({
-    initial: () => ({ counter: 0 }),
+    initial: () => ({ counter: 0 }), // Initial session data
   })
 );
 
 bot.on("text", async (ctx) => {
-  ctx.session.counter++; //increment the number of messages for each user
+  ctx.session.counter++; // Increment the counter for this user
   await ctx.reply(`Message counter is: ${ctx.session.counter}`);
 });
 
-// Start the Bot
 bot.launch();
 ```
 
-It's suffisiont but all session data is lost whenever tho bot's process is terminated or re-started, for more data persistance we should use `telegraf-session-local` package, It stores session data in a local JSON file, providing a simple yet effective persistence layer:
+This is sufficient for testing, but all session data is lost whenever the bot restarts. For data persistence, we can use a package like `telegraf-session-local`. It stores session data in a local **JSON file**.
+
+First, install it: `npm install telegraf-session-local`
 
 ```js
 const { Telegraf } = require("telegraf");
@@ -445,7 +453,8 @@ const { Telegraf } = require("telegraf");
 const LocalSession = require("telegraf-session-local");
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-// Configure session so it use session_db.json file
+
+// Configure the session to use a local JSON file for storage
 const localSession = new LocalSession({ database: "session_db.json" });
 // Use our session middleware
 bot.use(localSession.middleware());
@@ -458,14 +467,14 @@ bot.on("text", async (ctx) => {
   return next();
 });
 
-// Remove from database
+// Command to clear session data for a user
 bot.command("remove", async (ctx) => {
-  await ctx.reply("Session data removed");
-  ctx.session = null;
+  ctx.session = null; // Setting session to null removes it
+  await ctx.reply("Session data removed.");
 });
 ```
 
-> You can also use MongoDB which I didn't learned it yet, if you know and how free time, you can add it!
+> For production bots, you might use a database like Redis or MongoDB for session storage. I haven't learned that yet, but if you're familiar with it and have some free time, feel free to contribute a section!
 
 - What are **WizardScene**s and **Stage**s? to put it simply, we are just fine with using above methods BUT when it comes to managin complex, multi-step conversations(like a user registration flow or ) that you want prevent users from accidentally triggering other bot functions while in the middle of a dialog, here is where **WizardScene** comes in handy.A **Scene** functions as a modal state machine for the user. When a user enters a **Scene**, the bot's global command and hears handlers are temporarily disabled for that user. This creates an isolated conversational environment where only the listeners defined within the **current scene** step are active. You may ask: okay, but how to do that? before that you need to grasp these Core Components:
   **Core Components and Setup**
@@ -500,7 +509,7 @@ bot.command("remove", async (ctx) => {
 
 - **State:** The `ctx.wizard.state` object is used to store data collected across steps. This state is automatically cleared when the scene is left, which is a major advantage over using the global `ctx.session` for temporary conversational data.
 
-Now I assume You can comprehend below code:
+With that in mind, let's walk through the code for a simple registration wizard:
 
 ```js
 // Import Scenes
@@ -567,6 +576,6 @@ bot.launch();
 
 ### Personal Project 
 
-Now that we learn how to create our own bot, it's time to create something and learn in practice, funny thing here is that you wouldn't learn anything if don't fail! so try to fail.
+Now that we've learned the building blocks, it's time to create something and learn by doing. The funny thing is, you won't truly learn until you try, fail, and fix things. So go ahead and try to build something!
 
-I wil add my project here. Soon... 
+I will add my own project here soon...
