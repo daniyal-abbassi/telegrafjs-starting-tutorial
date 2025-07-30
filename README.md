@@ -19,7 +19,7 @@ There are several reasons to choose Telegraf.js, but the key one, especially for
 - [Send and Receive Media](#send-and-receive-media)
 - [Chains Of Middlewares](#chains-of-middlewars)
 - [State, Sessions and Wizards](#state-session-and-wizards)
-- [Personal Project](#personal-project)
+- [Personal Project](#personal-projects)
 
 ### 1.Get Your Bot Token from BotFather
 
@@ -574,8 +574,84 @@ bot.command("register", (ctx) => {
 bot.launch();
 ```
 
-### Personal Project 
+### Personal Projects
 
 Now that we've learned the building blocks, it's time to create something and learn by doing. The funny thing is, you won't truly learn until you try, fail, and fix things. So go ahead and try to build something!
 
-I will add my own project here soon...
+## Project Idea: An AI ChatBot 🤖 (a basic one!)
+
+Let's build something fun! We'll create a simple chatbot that uses Google's Gemini AI to respond to user messages. This is a great way to see how easily you can add powerful AI capabilities to your bot.
+
+## 1.What You'll Need
+- A **Telegram Bot Token** (you already have this from the first section).
+- A **Google AI API Key**. You can get one for free from [Google AI Studio](https://aistudio.google.com/app/apikey). Just create a new API key in your project.
+## 2.Project Setup & Installation
+Create a new folder for your project and initialize it:
+```bash
+mkdir ai-bot
+cd ai-bot
+npm init -y
+```
+Now, let's install the necessary packages: `telegraf` for the bot, `@google/genai` for the AI, and `dotenv` to manage our secret keys.
+```bash
+npm install telegraf @google/genai dotenv
+```
+Next, create a `.env` file in your project folder to store your keys securely. **Never** share this file or commit it to Git.
+```Ini
+# .env file
+BOT_TOKEN="YOUR_TELEGRAM_BOT_TOKEN_HERE"
+GEMINI_API_KEY="YOUR_GOOGLE_AI_API_KEY_HERE"
+```
+## 3.The Code
+Create a new file called `bot.js`. Here is the complete code with explanations.
+
+```js
+// load the .env file
+require("dotenv").config();
+// import telegraf
+const { Telegraf } = require("telegraf");
+// import gemini
+const { GoogleGenAI } = require("@google/genai");
+// --- CONFIGURE GEMINI ---
+const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
+
+// create bot
+const bot = new Telegraf(process.env.BOT_TOKEN);
+// a handler for /start command
+bot.start(async (ctx) => {
+  await ctx.reply("Send me a message");
+});
+// handler for text message
+bot.on("text", async (ctx) => {
+  const userInput = ctx.message.text;
+  try {
+    // show typing indicator to the user
+    await ctx.telegram.sendChatAction(ctx.chat.id, "typing");
+    // USE AI
+   const geminiResponse = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: userInput,
+    config: {
+      thinkingConfig: {
+        thinkingBudget: 0, // disable thinking ability - more spped and less token usage
+      }
+    }
+   })
+    ctx.reply(geminiResponse.text);
+  } catch (error) {
+    console.error("AI error: ", error);
+    ctx.reply("Sorry, ai is gone at the moment, do the thinking yourself...");
+  }
+});
+// launch the bot
+bot.launch();
+console.log("The Bot is Running...");
+// stop handling
+process.once("SIGINT", () => bot.stop("SIGING"));
+process.once("SIGTERM", () => bot.stop("SIGTERM"));
+
+```
+`sendChatAction`: This provides a great user experience, showing that the bot has received the message and is "thinking."
+
+## Song Lyrics Project
+Soon...
